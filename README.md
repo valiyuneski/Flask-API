@@ -3,6 +3,7 @@
 python3 -m venv venv
 pip install flask
 pip install requests
+pip3 install Flask-Limiter
 
 Now you can:
 •	GET /api/books → list all books (default 10 per page).

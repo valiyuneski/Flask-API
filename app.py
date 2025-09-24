@@ -1,6 +1,16 @@
 from flask import Flask, request, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
+
+# Initialize limiter
+limiter = Limiter(
+    key_func=get_remote_address,  # Rate limit per IP
+    default_limits=[]
+)
+limiter.init_app(app)
+
 
 # In-memory "database"
 books = [
@@ -86,6 +96,13 @@ def not_found_error(error):
 @app.errorhandler(405)
 def method_not_allowed_error(error):
     return jsonify({"error": "Method Not Allowed"}), 405
+
+
+@app.route('/api/books', methods=['GET'])
+@limiter.limit("10/minute")  # Limit each IP to 10 requests per minute
+def handle_Limiter_books():
+    # Example response
+    return jsonify({"message": "This is a rate-limited endpoint"})
 
 
 if __name__ == "__main__":
