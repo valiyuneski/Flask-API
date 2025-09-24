@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import logging
 
 app = Flask(__name__)
 
@@ -10,6 +11,9 @@ limiter = Limiter(
     default_limits=[]
 )
 limiter.init_app(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 
 # In-memory "database"
@@ -34,6 +38,7 @@ def validate_book_data(data: dict) -> bool:
 @app.route('/api/books', methods=['GET', 'POST'])
 def handle_books():
     if request.method == 'GET':
+        app.logger.info('GET request received for /api/books')  # Log a message
         # Query params
         author = request.args.get('author')
         page = int(request.args.get('page', 1))
@@ -51,6 +56,7 @@ def handle_books():
         return jsonify(paginated_books), 200
 
     elif request.method == 'POST':
+        app.logger.info('POST request received for /api/books')  # Log a message
         new_book = request.get_json()
         if not validate_book_data(new_book):
             return jsonify({"error": "Invalid book data"}), 400
